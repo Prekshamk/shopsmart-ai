@@ -3,6 +3,7 @@ import Hero from './components/Hero';
 import FeatureCard from './components/FeatureCard';
 import Footer from './components/Footer';
 import ProductCard from './components/ProductCard';
+import AIAssistant from './components/AIAssistant';
 
 function App() {
   return (
@@ -74,6 +75,8 @@ function App() {
     />
   </div>
 </section>
+
+<AIAssistant />
 
       <Footer />
     </div>
