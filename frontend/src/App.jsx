@@ -1,136 +1,81 @@
+import Navbar from './components/Navbar';
+import Hero from './components/Hero';
+import FeatureCard from './components/FeatureCard';
+import Footer from './components/Footer';
+import ProductCard from './components/ProductCard';
+
 function App() {
   return (
     <div style={{ fontFamily: 'Arial', backgroundColor: '#f8fafc', minHeight: '100vh' }}>
+      <Navbar />
+      <Hero />
 
-      {/* Navbar */}
-      <nav style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '20px 60px',
-        backgroundColor: 'white',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
-      }}>
-        <h2 style={{ color: '#1e3a8a' }}>ShopSmart AI</h2>
-        <div style={{ display: 'flex', gap: '20px' }}>
-          <a href="#" style={{ textDecoration: 'none', color: '#374151' }}>Home</a>
-          <a href="#" style={{ textDecoration: 'none', color: '#374151' }}>Products</a>
-          <a href="#" style={{ textDecoration: 'none', color: '#374151' }}>AI Assistant</a>
-          <a href="#" style={{ textDecoration: 'none', color: '#374151' }}>Contact</a>
-        </div>
-      </nav>
-
-      {/* Hero Section */}
-      <section style={{
-        textAlign: 'center',
-        padding: '100px 20px'
-      }}>
-        <h1 style={{
-          fontSize: '56px',
-          color: '#111827',
-          marginBottom: '20px'
-        }}>
-          Shop Smarter with AI
-        </h1>
-
-        <p style={{
-          fontSize: '22px',
-          color: '#4b5563',
-          maxWidth: '800px',
-          margin: '0 auto 30px'
-        }}>
-          Personalized product recommendations, smart price comparison,
-          and sustainable shopping choices powered by artificial intelligence.
-        </p>
-
-        <div style={{
+      <section
+        style={{
           display: 'flex',
           justifyContent: 'center',
-          gap: '15px',
-          flexWrap: 'wrap'
-        }}>
-          <button style={{
-            padding: '15px 30px',
-            fontSize: '18px',
-            backgroundColor: '#2563eb',
-            color: 'white',
-            border: 'none',
-            borderRadius: '12px',
-            cursor: 'pointer'
-          }}>
-            Start Shopping
-          </button>
+          gap: '24px',
+          padding: '40px 20px',
+          flexWrap: 'wrap',
+        }}
+      >
+        <FeatureCard
+          title="AI Recommendations"
+          description="Get products tailored to your preferences and budget."
+        />
 
-          <button style={{
-            padding: '15px 30px',
-            fontSize: '18px',
-            backgroundColor: 'white',
-            color: '#2563eb',
-            border: '2px solid #2563eb',
-            borderRadius: '12px',
-            cursor: 'pointer'
-          }}>
-            Ask AI Assistant
-          </button>
-        </div>
+        <FeatureCard
+          title="Smart Price Comparison"
+          description="Compare prices across stores instantly before purchasing."
+        />
+
+        <FeatureCard
+          title="Eco-Friendly Choices"
+          description="Discover sustainable products with lower environmental impact."
+        />
       </section>
 
-      {/* Features */}
-      <section style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-        gap: '20px',
-        padding: '40px 60px 80px'
-      }}>
+      <section style={{ padding: '60px 20px' }}>
+  <h2
+    style={{
+      textAlign: 'center',
+      fontSize: '36px',
+      marginBottom: '40px',
+      color: '#111827',
+    }}
+  >
+    Featured Products
+  </h2>
 
-        <div style={{
-          backgroundColor: 'white',
-          padding: '30px',
-          borderRadius: '16px',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
-        }}>
-          <h3 style={{ color: '#111827' }}>AI Recommendations</h3>
-          <p style={{ color: '#4b5563' }}>
-            Get products tailored to your preferences and budget.
-          </p>
-        </div>
+  <div
+    style={{
+      display: 'flex',
+      justifyContent: 'center',
+      gap: '24px',
+      flexWrap: 'wrap',
+    }}
+  >
+    <ProductCard
+      name="Wireless Headphones"
+      price="2,499"
+      image="https://images.unsplash.com/photo-1518444065439-e933c06ce9cd?w=500"
+    />
 
-        <div style={{
-          backgroundColor: 'white',
-          padding: '30px',
-          borderRadius: '16px',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
-        }}>
-          <h3 style={{ color: '#111827' }}>Smart Price Comparison</h3>
-          <p style={{ color: '#4b5563' }}>
-            Compare prices across stores instantly before purchasing.
-          </p>
-        </div>
+    <ProductCard
+      name="Smart Watch"
+      price="3,999"
+      image="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500"
+    />
 
-        <div style={{
-          backgroundColor: 'white',
-          padding: '30px',
-          borderRadius: '16px',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
-        }}>
-          <h3 style={{ color: '#111827' }}>Eco-Friendly Choices</h3>
-          <p style={{ color: '#4b5563' }}>
-            Discover sustainable products with lower environmental impact.
-          </p>
-        </div>
+    <ProductCard
+      name="Eco Water Bottle"
+      price="799"
+      image="https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=500"
+    />
+  </div>
+</section>
 
-      </section>
-
-      {/* Footer */}
-      <footer style={{
-        textAlign: 'center',
-        padding: '30px',
-        color: '#6b7280',
-        borderTop: '1px solid #e5e7eb'
-      }}>
-        © 2026 ShopSmart AI by Preksha • Built with React + Vite
-      </footer>
-
+      <Footer />
     </div>
   );
 }
