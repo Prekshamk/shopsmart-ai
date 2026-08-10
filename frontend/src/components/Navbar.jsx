@@ -1,4 +1,4 @@
-export default function Navbar() {
+export default function Navbar({ cartCount }) {
   return (
     <nav
       style={{
@@ -18,6 +18,9 @@ export default function Navbar() {
         <a href="#">AI Assistant</a>
         <a href="#">Contact</a>
       </div>
+      <div className="cart-badge">
+  Cart ({cartCount})
+</div>
     </nav>
   );
 }

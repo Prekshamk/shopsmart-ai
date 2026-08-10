@@ -5,10 +5,14 @@ import Footer from './components/Footer';
 import ProductCard from './components/ProductCard';
 import AIAssistant from './components/AIAssistant';
 
+import { useState } from 'react';
+
 function App() {
+  const [cartCount, setCartCount] = useState(0);
+
   return (
     <div style={{ fontFamily: 'Arial', backgroundColor: '#f8fafc', minHeight: '100vh' }}>
-      <Navbar />
+      <Navbar cartCount={cartCount} />
       <Hero />
 
       <section
@@ -60,18 +64,21 @@ function App() {
       name="Wireless Headphones"
       price="2,499"
       image="https://images.unsplash.com/photo-1518444065439-e933c06ce9cd?w=500"
+      onAddToCart={() => setCartCount(cartCount + 1)}
     />
 
     <ProductCard
       name="Smart Watch"
       price="3,999"
       image="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500"
+      onAddToCart={() => setCartCount(cartCount + 1)}
     />
 
     <ProductCard
       name="Eco Water Bottle"
       price="799"
       image="https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=500"
+      onAddToCart={() => setCartCount(cartCount + 1)}
     />
   </div>
 </section>

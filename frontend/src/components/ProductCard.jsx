@@ -1,4 +1,4 @@
-export default function ProductCard({ name, price, image }) {
+export default function ProductCard({ name, price, image, onAddToCart }) {
   return (
     <div
       style={{
@@ -29,18 +29,19 @@ export default function ProductCard({ name, price, image }) {
       </p>
 
       <button
-        style={{
-          marginTop: '14px',
-          padding: '10px 20px',
-          border: 'none',
-          borderRadius: '10px',
-          backgroundColor: '#2563eb',
-          color: '#ffffff',
-          cursor: 'pointer',
-        }}
-      >
-        Add to Cart
-      </button>
+  onClick={onAddToCart}
+  style={{
+    backgroundColor: '#2563eb',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '10px',
+    padding: '10px 20px',
+    cursor: 'pointer',
+    fontWeight: '600'
+  }}
+>
+  Add to Cart
+</button>
     </div>
   );
 }
