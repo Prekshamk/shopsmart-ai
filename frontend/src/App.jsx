@@ -1,93 +1,129 @@
+import { useState } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import FeatureCard from './components/FeatureCard';
-import Footer from './components/Footer';
 import ProductCard from './components/ProductCard';
 import AIAssistant from './components/AIAssistant';
+import Footer from './components/Footer';
+import './App.css';
 
-import { useState } from 'react';
+export default function App() {
+  const [cartItems, setCartItems] = useState([]);
+  const [showCart, setShowCart] = useState(false);
 
-function App() {
-  const [cartCount, setCartCount] = useState(0);
+  const addToCart = (product) => {
+    setCartItems((prev) => [...prev, product]);
+  };
+
+  const products = [
+    {
+      name: 'Wireless Headphones',
+      price: '₹2,499',
+      image:
+        'https://images.unsplash.com/photo-1518444065439-e933c06ce9cd?q=80&w=600&auto=format&fit=crop',
+    },
+    {
+      name: 'Smart Watch',
+      price: '₹3,999',
+      image:
+        'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=600&auto=format&fit=crop',
+    },
+    {
+      name: 'Eco Water Bottle',
+      price: '₹799',
+      image:
+        'https://images.unsplash.com/photo-1602143407151-7111542de6e8?q=80&w=600&auto=format&fit=crop',
+    },
+  ];
+
+  const total = cartItems.reduce(
+    (sum, item) =>
+      sum + Number(item.price.replace('₹', '').replace(',', '')),
+    0
+  );
 
   return (
-    <div style={{ fontFamily: 'Arial', backgroundColor: '#f8fafc', minHeight: '100vh' }}>
-      <Navbar cartCount={cartCount} />
+    <>
+      <Navbar
+        cartCount={cartItems.length}
+        onCartClick={() => setShowCart(!showCart)}
+      />
+
       <Hero />
 
-      <section
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          gap: '24px',
-          padding: '40px 20px',
-          flexWrap: 'wrap',
-        }}
-      >
+      {showCart && (
+        <div
+          style={{
+            maxWidth: '900px',
+            margin: '20px auto',
+            background: '#fff',
+            padding: '24px',
+            borderRadius: '16px',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+          }}
+        >
+          <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>
+            Shopping Cart
+          </h2>
+
+          {cartItems.length === 0 ? (
+            <p style={{ textAlign: 'center' }}>Your cart is empty.</p>
+          ) : (
+            <>
+              {cartItems.map((item, index) => (
+                <div
+                  key={index}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    padding: '12px 0',
+                    borderBottom: '1px solid #e5e7eb',
+                  }}
+                >
+                  <span>{item.name}</span>
+                  <span>{item.price}</span>
+                </div>
+              ))}
+
+              <h3 style={{ textAlign: 'center', marginTop: '20px' }}>
+                Total: ₹{total}
+              </h3>
+            </>
+          )}
+        </div>
+      )}
+
+      <section className="features">
         <FeatureCard
           title="AI Recommendations"
-          description="Get products tailored to your preferences and budget."
+          text="Get products tailored to your preferences and budget."
         />
 
         <FeatureCard
           title="Smart Price Comparison"
-          description="Compare prices across stores instantly before purchasing."
-        />
-
-        <FeatureCard
-          title="Eco-Friendly Choices"
-          description="Discover sustainable products with lower environmental impact."
+          text="Compare prices across stores instantly before purchasing."
         />
       </section>
 
-      <section style={{ padding: '60px 20px' }}>
-  <h2
-    style={{
-      textAlign: 'center',
-      fontSize: '36px',
-      marginBottom: '40px',
-      color: '#111827',
-    }}
-  >
-    Featured Products
-  </h2>
+      <section className="products">
+        <h2>Featured Products</h2>
 
-  <div
-    style={{
-      display: 'flex',
-      justifyContent: 'center',
-      gap: '24px',
-      flexWrap: 'wrap',
-    }}
-  >
-    <ProductCard
-      name="Wireless Headphones"
-      price="2,499"
-      image="https://images.unsplash.com/photo-1518444065439-e933c06ce9cd?w=500"
-      onAddToCart={() => setCartCount(cartCount + 1)}
-    />
+        <div className="product-grid">
+          {products.map((product) => (
+            <ProductCard
+              key={product.name}
+              name={product.name}
+              price={product.price}
+              image={product.image}
+              onAddToCart={() => addToCart(product)}
+            />
+          ))}
+        </div>
+      </section>
 
-    <ProductCard
-      name="Smart Watch"
-      price="3,999"
-      image="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500"
-      onAddToCart={() => setCartCount(cartCount + 1)}
-    />
-
-    <ProductCard
-      name="Eco Water Bottle"
-      price="799"
-      image="https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=500"
-      onAddToCart={() => setCartCount(cartCount + 1)}
-    />
-  </div>
-</section>
-
-<AIAssistant />
+      <AIAssistant />
 
       <Footer />
-    </div>
+    </>
   );
 }
-
-export default App;

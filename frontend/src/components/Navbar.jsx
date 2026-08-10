@@ -1,4 +1,4 @@
-export default function Navbar({ cartCount }) {
+export default function Navbar({ cartCount, onCartClick }) {
   return (
     <nav
       style={{
@@ -18,9 +18,20 @@ export default function Navbar({ cartCount }) {
         <a href="#">AI Assistant</a>
         <a href="#">Contact</a>
       </div>
-      <div className="cart-badge">
+      <button
+  onClick={onCartClick}
+  style={{
+    background: '#2563eb',
+    color: 'white',
+    border: 'none',
+    borderRadius: '10px',
+    padding: '10px 18px',
+    cursor: 'pointer',
+    fontWeight: '600',
+  }}
+>
   Cart ({cartCount})
-</div>
+</button>
     </nav>
   );
 }
