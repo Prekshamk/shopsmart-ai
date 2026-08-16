@@ -47,6 +47,7 @@ products = [
         "description": "A reusable and sustainable water bottle.",
         "keywords": [
             "bottle",
+            "water bottle",
             "water",
             "sustainable",
             "sustainability",
@@ -64,36 +65,33 @@ products = [
 # ============================================================
 
 def format_price(price):
-    """
-    Convert 2499 -> ₹2,499
-    """
     return f"₹{price:,}"
 
 
 def extract_budget(query):
     """
-    Detect price limits from natural language.
+    Extract budget from queries such as:
 
-    Examples:
     under 3000
     below ₹3000
     less than 3000
     within 3000
     budget 3000
-    under ₹2,500
+    upto 3000
+    up to ₹2,500
     """
 
     patterns = [
-        r'(?:under|below|less than|within|max(?:imum)?|upto|up to)\s*₹?\s*([\d,]+)',
-        r'(?:budget|price)\s*(?:of|is|around)?\s*₹?\s*([\d,]+)',
-        r'₹\s*([\d,]+)\s*(?:or less|maximum|max)'
+        r"(?:under|below|less than|within|upto|up to)\s*₹?\s*([\d,]+)",
+        r"(?:budget|price)\s*(?:of|is|around)?\s*₹?\s*([\d,]+)",
+        r"₹\s*([\d,]+)\s*(?:or less|maximum|max)"
     ]
 
     for pattern in patterns:
         match = re.search(pattern, query)
 
         if match:
-            number = match.group(1).replace(',', '')
+            number = match.group(1).replace(",", "")
 
             try:
                 return int(number)
@@ -105,7 +103,7 @@ def extract_budget(query):
 
 def find_matching_products(query):
     """
-    Find products based on keywords in the user's query.
+    Find products based on keywords.
     """
 
     matches = []
@@ -121,31 +119,52 @@ def find_matching_products(query):
     return matches
 
 
-def product_details(product):
+def find_comparison_products(query):
     """
-    Return a nicely formatted product description.
+    Find products specifically mentioned in comparison queries.
     """
 
-    return (
-        f"{product['name']} at {format_price(product['price'])}. "
-        f"{product['description']}"
-    )
+    selected = []
+
+    # Headphones
+    if "headphone" in query or "headphones" in query:
+        selected.append(products[0])
+
+    # Smart Watch
+    if (
+        "smartwatch" in query
+        or "smart watch" in query
+        or (
+            "watch" in query
+            and "water" not in query
+        )
+    ):
+        selected.append(products[1])
+
+    # Water Bottle
+    if (
+        "bottle" in query
+        or "water bottle" in query
+    ):
+        selected.append(products[2])
+
+    return selected
 
 
 # ============================================================
-# MAIN RECOMMENDATION API
+# RECOMMENDATION API
 # ============================================================
 
-@app.route('/api/recommend', methods=['POST'])
+@app.route("/api/recommend", methods=["POST"])
 def recommend():
 
     # --------------------------------------------------------
-    # GET USER QUERY
+    # READ REQUEST
     # --------------------------------------------------------
 
     data = request.get_json(silent=True) or {}
 
-    query = data.get('query', '')
+    query = data.get("query", "")
 
     if not isinstance(query, str):
         query = str(query)
@@ -160,11 +179,11 @@ def recommend():
     if not query:
 
         return jsonify({
-            'answer': (
-                'Please tell me what you are looking for. '
-                'For example, you can ask for headphones, '
-                'a fitness product, the cheapest product, '
-                'or products under ₹3000.'
+            "answer": (
+                "Please tell me what you are looking for. "
+                "For example, you can ask for headphones, "
+                "something for fitness, the cheapest product, "
+                "or products under ₹3000."
             )
         })
 
@@ -176,22 +195,131 @@ def recommend():
     budget = extract_budget(query)
 
 
-    # --------------------------------------------------------
-    # SHOW ALL PRODUCTS
-    # --------------------------------------------------------
+    # ========================================================
+    # 1. PRODUCT COMPARISON
+    # ========================================================
+
+    comparison_words = [
+        "compare",
+        "comparison",
+        "versus",
+        "vs",
+        "difference",
+        "price comparison"
+    ]
+
+    if any(word in query for word in comparison_words):
+
+        comparison_products = find_comparison_products(query)
+
+        # ----------------------------------------------------
+        # Compare specifically mentioned products
+        # ----------------------------------------------------
+
+        if len(comparison_products) >= 2:
+
+            comparison_text = []
+
+            for product in comparison_products:
+
+                comparison_text.append(
+                    f"{product['name']} "
+                    f"({format_price(product['price'])}) - "
+                    f"{product['description']}"
+                )
+
+            cheapest = min(
+                comparison_products,
+                key=lambda product: product["price"]
+            )
+
+            expensive = max(
+                comparison_products,
+                key=lambda product: product["price"]
+            )
+
+            difference = (
+                expensive["price"] - cheapest["price"]
+            )
+
+            answer = (
+                "Here is the comparison: "
+                + " | ".join(comparison_text)
+                + ". "
+                + f"{cheapest['name']} is the more affordable option. "
+                + f"{expensive['name']} costs "
+                + f"{format_price(difference)} more."
+            )
+
+            return jsonify({
+                "answer": answer
+            })
+
+
+        # ----------------------------------------------------
+        # Only one product mentioned
+        # ----------------------------------------------------
+
+        elif len(comparison_products) == 1:
+
+            product = comparison_products[0]
+
+            answer = (
+                f"I found {product['name']} at "
+                f"{format_price(product['price'])}. "
+                f"{product['description']} "
+                "Please mention another product if you want "
+                "a comparison."
+            )
+
+            return jsonify({
+                "answer": answer
+            })
+
+
+        # ----------------------------------------------------
+        # Compare all products
+        # ----------------------------------------------------
+
+        else:
+
+            sorted_products = sorted(
+                products,
+                key=lambda product: product["price"]
+            )
+
+            answer = (
+                "Here is the price comparison: "
+                f"{sorted_products[0]['name']} - "
+                f"{format_price(sorted_products[0]['price'])}, "
+                f"{sorted_products[1]['name']} - "
+                f"{format_price(sorted_products[1]['price'])}, "
+                f"and {sorted_products[2]['name']} - "
+                f"{format_price(sorted_products[2]['price'])}."
+            )
+
+            return jsonify({
+                "answer": answer
+            })
+
+
+    # ========================================================
+    # 2. SHOW ALL PRODUCTS
+    # ========================================================
 
     show_all_words = [
-        'show all',
-        'show me all',
-        'all products',
-        'all items',
-        'available products',
-        'available items',
-        'what products',
-        'what do you have',
-        'catalog',
-        'list products',
-        'list all'
+        "show all",
+        "show me all",
+        "all products",
+        "all items",
+        "available products",
+        "available items",
+        "what products",
+        "what do you have",
+        "catalog",
+        "list products",
+        "list all",
+        "show me products"
     ]
 
     if any(word in query for word in show_all_words):
@@ -203,53 +331,58 @@ def recommend():
             "Eco Water Bottle for ₹799."
         )
 
-        return jsonify({'answer': answer})
+        return jsonify({
+            "answer": answer
+        })
 
 
-    # --------------------------------------------------------
-    # CHEAPEST PRODUCT
-    # --------------------------------------------------------
+    # ========================================================
+    # 3. CHEAPEST PRODUCT
+    # ========================================================
 
     cheapest_words = [
-        'cheapest',
-        'lowest price',
-        'lowest',
-        'most affordable',
-        'affordable',
-        'least expensive',
-        'cheaper option',
-        'cheapest option'
+        "cheapest",
+        "lowest price",
+        "lowest",
+        "most affordable",
+        "affordable",
+        "least expensive",
+        "cheapest option"
     ]
 
     if any(word in query for word in cheapest_words):
 
         cheapest = min(
             products,
-            key=lambda product: product['price']
+            key=lambda product: product["price"]
         )
 
         answer = (
             f"The most affordable option is "
-            f"{product_details(cheapest)}"
+            f"{cheapest['name']} at "
+            f"{format_price(cheapest['price'])}. "
+            f"{cheapest['description']}"
         )
 
-        return jsonify({'answer': answer})
+        return jsonify({
+            "answer": answer
+        })
 
 
-    # --------------------------------------------------------
-    # BEST PRODUCT
-    # --------------------------------------------------------
+    # ========================================================
+    # 4. BEST PRODUCT
+    # ========================================================
 
     best_words = [
-        'best product',
-        'best option',
-        'best choice',
-        'best one',
-        'recommend something',
-        'recommend a product',
-        'suggest something',
-        'good product',
-        'good option'
+        "best product",
+        "best option",
+        "best choice",
+        "best one",
+        "recommend something",
+        "recommend a product",
+        "suggest something",
+        "good product",
+        "good option"
     ]
 
     if any(word in query for word in best_words):
@@ -261,35 +394,39 @@ def recommend():
             "and Eco Water Bottle for sustainable everyday use."
         )
 
-        return jsonify({'answer': answer})
+        return jsonify({
+            "answer": answer
+        })
 
 
-    # --------------------------------------------------------
-    # FIND PRODUCTS MATCHING USER'S REQUIREMENT
-    # --------------------------------------------------------
+    # ========================================================
+    # 5. FIND PRODUCT MATCHES
+    # ========================================================
 
     matching_products = find_matching_products(query)
 
 
-    # --------------------------------------------------------
-    # PRODUCT + BUDGET
-    #
-    # Example:
-    # "music under 3000"
-    # "fitness below 4000"
-    # "bottle under 1000"
-    # --------------------------------------------------------
+    # ========================================================
+    # 6. PRODUCT + BUDGET
+    # ========================================================
 
     if budget is not None:
 
-        # If user mentioned a specific product/category
+        # ----------------------------------------------------
+        # User mentioned a specific product/category
+        # ----------------------------------------------------
+
         if matching_products:
 
             affordable_matches = [
                 product
                 for product in matching_products
-                if product['price'] <= budget
+                if product["price"] <= budget
             ]
+
+            # -----------------------------------------------
+            # Matching product is within budget
+            # -----------------------------------------------
 
             if affordable_matches:
 
@@ -300,72 +437,83 @@ def recommend():
                     answer = (
                         f"Yes! I recommend {product['name']} "
                         f"at {format_price(product['price'])}. "
-                        f"It fits your budget of {format_price(budget)}. "
+                        f"It fits your budget of "
+                        f"{format_price(budget)}. "
                         f"{product['description']}"
                     )
 
                 else:
 
-                    names = ", ".join(
-                        f"{product['name']} ({format_price(product['price'])})"
+                    product_list = ", ".join(
+                        f"{product['name']} "
+                        f"({format_price(product['price'])})"
                         for product in affordable_matches
                     )
 
                     answer = (
-                        f"Here are the products that fit your budget "
-                        f"of {format_price(budget)}: {names}."
+                        f"Here are the products that fit your "
+                        f"budget of {format_price(budget)}: "
+                        f"{product_list}."
                     )
 
-                return jsonify({'answer': answer})
+                return jsonify({
+                    "answer": answer
+                })
 
+
+            # -----------------------------------------------
+            # Matching product is NOT within budget
+            # -----------------------------------------------
 
             else:
 
-                cheapest_match = min(
+                closest = min(
                     matching_products,
-                    key=lambda product: product['price']
+                    key=lambda product: product["price"]
                 )
 
                 answer = (
                     f"I couldn't find a matching product within "
                     f"{format_price(budget)}. "
-                    f"The closest option is {cheapest_match['name']} "
-                    f"at {format_price(cheapest_match['price'])}."
+                    f"The closest option is "
+                    f"{closest['name']} at "
+                    f"{format_price(closest['price'])}."
                 )
 
-                return jsonify({'answer': answer})
+                return jsonify({
+                    "answer": answer
+                })
 
 
         # ----------------------------------------------------
-        # ONLY BUDGET GIVEN
-        # Example:
-        # "products under 3000"
-        # "show products below 3000"
+        # User only gave a budget
         # ----------------------------------------------------
 
         affordable_products = [
             product
             for product in products
-            if product['price'] <= budget
+            if product["price"] <= budget
         ]
 
         if affordable_products:
 
             product_list = ", ".join(
-                f"{product['name']} ({format_price(product['price'])})"
+                f"{product['name']} "
+                f"({format_price(product['price'])})"
                 for product in affordable_products
             )
 
             answer = (
                 f"Here are the products available within "
-                f"{format_price(budget)}: {product_list}."
+                f"{format_price(budget)}: "
+                f"{product_list}."
             )
 
         else:
 
             cheapest = min(
                 products,
-                key=lambda product: product['price']
+                key=lambda product: product["price"]
             )
 
             answer = (
@@ -376,77 +524,59 @@ def recommend():
                 f"{format_price(cheapest['price'])}."
             )
 
-        return jsonify({'answer': answer})
+        return jsonify({
+            "answer": answer
+        })
 
 
-    # --------------------------------------------------------
-    # SPECIFIC PRODUCT WITHOUT BUDGET
-    # --------------------------------------------------------
+    # ========================================================
+    # 7. SPECIFIC PRODUCT WITHOUT BUDGET
+    # ========================================================
 
     if matching_products:
 
-        # If only one product matches
+        # ----------------------------------------------------
+        # One product
+        # ----------------------------------------------------
+
         if len(matching_products) == 1:
 
             product = matching_products[0]
 
             answer = (
-                f"I recommend {product['name']} "
-                f"at {format_price(product['price'])}. "
+                f"I recommend {product['name']} at "
+                f"{format_price(product['price'])}. "
                 f"{product['description']}"
             )
 
-            return jsonify({'answer': answer})
+            return jsonify({
+                "answer": answer
+            })
 
 
-        # Multiple products match
-        names = ", ".join(
-            f"{product['name']} ({format_price(product['price'])})"
+        # ----------------------------------------------------
+        # Multiple products
+        # ----------------------------------------------------
+
+        product_list = ", ".join(
+            f"{product['name']} "
+            f"({format_price(product['price'])})"
             for product in matching_products
         )
 
         answer = (
-            f"Based on your request, you can consider: {names}."
+            f"Based on your request, you can consider: "
+            f"{product_list}."
         )
 
-        return jsonify({'answer': answer})
+        return jsonify({
+            "answer": answer
+        })
 
 
-    # --------------------------------------------------------
-    # PRICE COMPARISON
-    # --------------------------------------------------------
-
-    comparison_words = [
-        'compare prices',
-        'price comparison',
-        'compare products',
-        'compare',
-        'price'
-    ]
-
-    if any(word in query for word in comparison_words):
-
-        sorted_products = sorted(
-            products,
-            key=lambda product: product['price']
-        )
-
-        answer = (
-            f"Price comparison: "
-            f"{sorted_products[0]['name']} - "
-            f"{format_price(sorted_products[0]['price'])}, "
-            f"{sorted_products[1]['name']} - "
-            f"{format_price(sorted_products[1]['price'])}, "
-            f"and {sorted_products[2]['name']} - "
-            f"{format_price(sorted_products[2]['price'])}."
-        )
-
-        return jsonify({'answer': answer})
-
-
-    # --------------------------------------------------------
-    # DEFAULT RESPONSE
-    # --------------------------------------------------------
+    # ========================================================
+    # 8. DEFAULT RESPONSE
+    # ========================================================
 
     answer = (
         "I can help you choose a product. "
@@ -454,15 +584,18 @@ def recommend():
         "\"I need something for music\", "
         "\"Suggest something for fitness\", "
         "\"What is the cheapest product?\", "
+        "\"Compare headphones and smartwatch\", "
         "or \"Show me products under ₹3000\"."
     )
 
-    return jsonify({'answer': answer})
+    return jsonify({
+        "answer": answer
+    })
 
 
 # ============================================================
 # RUN FLASK SERVER
 # ============================================================
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)
