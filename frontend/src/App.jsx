@@ -12,8 +12,14 @@ export default function App() {
   const [showCart, setShowCart] = useState(false);
 
   const addToCart = (product) => {
-    setCartItems((prev) => [...prev, product]);
-  };
+  setCartItems((prev) => [...prev, product]);
+};
+
+const removeFromCart = (indexToRemove) => {
+  setCartItems((prev) =>
+    prev.filter((_, index) => index !== indexToRemove)
+  );
+};
 
   const products = [
     {
@@ -71,19 +77,38 @@ export default function App() {
           ) : (
             <>
               {cartItems.map((item, index) => (
-                <div
-                  key={index}
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    padding: '12px 0',
-                    borderBottom: '1px solid #e5e7eb',
-                  }}
-                >
-                  <span>{item.name}</span>
-                  <span>{item.price}</span>
-                </div>
-              ))}
+  <div
+    key={index}
+    style={{
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: '12px 0',
+      borderBottom: '1px solid #e5e7eb',
+      gap: '12px',
+    }}
+  >
+    <div>
+      <div style={{ fontWeight: '600' }}>{item.name}</div>
+      <div style={{ color: '#2563eb' }}>{item.price}</div>
+    </div>
+
+    <button
+      onClick={() => removeFromCart(index)}
+      style={{
+        backgroundColor: '#ef4444',
+        color: 'white',
+        border: 'none',
+        borderRadius: '8px',
+        padding: '6px 12px',
+        cursor: 'pointer',
+        fontWeight: '600',
+      }}
+    >
+      Remove
+    </button>
+  </div>
+))}
 
               <h3 style={{ textAlign: 'center', marginTop: '20px' }}>
                 Total: ₹{total}
